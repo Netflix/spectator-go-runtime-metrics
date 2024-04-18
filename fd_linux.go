@@ -27,7 +27,7 @@ func getNumFiles(dir string) (n int, err error) {
 	return len(entries), err
 }
 
-func updateFdStats(s *spectator_go.sysStatsCollector, cur int, max uint64) {
+func updateFdStats(s *sysStatsCollector, cur int, max uint64) {
 	s.curOpen.Set(float64(cur))
 	s.maxOpen.Set(float64(max))
 }
