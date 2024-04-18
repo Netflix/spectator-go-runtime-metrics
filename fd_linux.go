@@ -32,7 +32,7 @@ func updateFdStats(s *sysStatsCollector, cur int, max uint64) {
 	s.maxOpen.Set(float64(max))
 }
 
-func fdStats(s *spectator_go.sysStatsCollector) {
+func fdStats(s *sysStatsCollector) {
 	// do not include /proc/self/fd in the count, since it will be opened
 	// when we get the number of files under self/fd
 	currentFdCount, err := getNumFiles("/proc/self/fd")
