@@ -1,4 +1,4 @@
-package spectator
+package runtime_metrics
 
 import (
 	"github.com/Netflix/spectator-go"

@@ -1,7 +1,7 @@
 //go:build !linux
 // +build !linux
 
-package spectator
+package runtime_metrics
 
 func fdStats(s *sysStatsCollector) {
 	// do nothing

@@ -1,12 +1,13 @@
-package spectator
+package runtime_metrics
 
 import (
 	"github.com/Netflix/spectator-go"
+	spectator2 "github.com/Netflix/spectator-go-runtime-metrics"
 	"testing"
 )
 
 func TestNewMonotonicCounter(t *testing.T) {
-	r := spectator.NewRegistry(makeConfig("http://example.org"))
+	r := spectator.NewRegistry(spectator2.makeConfig("http://example.org"))
 	c := NewMonotonicCounter(r, "mono", nil)
 
 	if v := c.Count(); v != 0 {
@@ -30,7 +31,7 @@ func TestNewMonotonicCounter(t *testing.T) {
 }
 
 func TestMonotonicCounterStartingAt0(t *testing.T) {
-	r := spectator.NewRegistry(makeConfig("http://example.org"))
+	r := spectator.NewRegistry(spectator2.makeConfig("http://example.org"))
 	c := NewMonotonicCounter(r, "mono", nil)
 
 	c.Set(0)
@@ -49,7 +50,7 @@ func TestMonotonicCounterStartingAt0(t *testing.T) {
 }
 
 func TestMonotonicCounterThreadSafety(t *testing.T) {
-	r := spectator.NewRegistry(makeConfig("http://example.org"))
+	r := spectator.NewRegistry(spectator2.makeConfig("http://example.org"))
 	c := NewMonotonicCounter(r, "mono", nil)
 
 	go func() {
