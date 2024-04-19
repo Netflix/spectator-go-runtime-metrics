@@ -6,12 +6,12 @@ import (
 	"sync/atomic"
 )
 
-// MonotonicCounter is used track a monotonically increasing counter.
+// monotonicCounter is used track a monotonically increasing counter.
 //
 // You can find more about this type by viewing the relevant Java Spectator documentation here:
 //
 // https://netflix.github.io/spectator/en/latest/intro/gauge/#monotonic-counters
-type MonotonicCounter struct {
+type monotonicCounter struct {
 	value int64
 	// Pointers need to be after counters to ensure 64-bit alignment. See
 	// note in atomicnum.go
@@ -21,24 +21,24 @@ type MonotonicCounter struct {
 	counterOnce sync.Once
 }
 
-// NewMonotonicCounter generates a new monotonic counter, taking the registry so
+// newMonotonicCounter generates a new monotonic counter, taking the registry so
 // that it can lazy-load the underlying counter once `Set` is called the first
 // time. It generates a new meter identifier from the name and tags.
-func NewMonotonicCounter(registry *spectator.Registry, name string, tags map[string]string) *MonotonicCounter {
-	return NewMonotonicCounterWithId(registry, spectator.NewId(name, tags))
+func newMonotonicCounter(registry *spectator.Registry, name string, tags map[string]string) *monotonicCounter {
+	return newMonotonicCounterWithId(registry, spectator.NewId(name, tags))
 }
 
-// NewMonotonicCounterWithId generates a new monotonic counter, using the
+// newMonotonicCounterWithId generates a new monotonic counter, using the
 // provided meter identifier.
-func NewMonotonicCounterWithId(registry *spectator.Registry, id *spectator.Id) *MonotonicCounter {
-	return &MonotonicCounter{
+func newMonotonicCounterWithId(registry *spectator.Registry, id *spectator.Id) *monotonicCounter {
+	return &monotonicCounter{
 		registry: registry,
 		id:       id,
 	}
 }
 
 // Set adds amount to the current counter.
-func (c *MonotonicCounter) Set(amount int64) {
+func (c *monotonicCounter) Set(amount int64) {
 	var uninitialized bool
 	c.counterOnce.Do(func() {
 		c.counter = c.registry.CounterWithId(c.id)
@@ -57,6 +57,6 @@ func (c *MonotonicCounter) Set(amount int64) {
 }
 
 // Count returns the current counter value.
-func (c *MonotonicCounter) Count() int64 {
+func (c *monotonicCounter) Count() int64 {
 	return atomic.LoadInt64(&c.value)
 }

@@ -10,17 +10,17 @@ type memStatsCollector struct {
 	clock            Clock
 	registry         *spectator.Registry
 	bytesAlloc       *spectator.Gauge
-	allocationRate   *spectator.MonotonicCounter
+	allocationRate   *monotonicCounter
 	totalBytesSystem *spectator.Gauge
 	numLiveObjects   *spectator.Gauge
-	objectsAllocated *MonotonicCounter
-	objectsFreed     *MonotonicCounter
+	objectsAllocated *monotonicCounter
+	objectsFreed     *monotonicCounter
 
 	gcLastPauseTimeValue uint64
 	gcPauseTime          *spectator.Timer
 	gcAge                *spectator.Gauge
-	gcCount              *MonotonicCounter
-	forcedGcCount        *MonotonicCounter
+	gcCount              *monotonicCounter
+	forcedGcCount        *monotonicCounter
 	gcPercCpu            *spectator.Gauge
 }
 
@@ -56,15 +56,15 @@ func initializeMemStatsCollector(registry *spectator.Registry, clock Clock, mem 
 	mem.clock = clock
 	mem.registry = registry
 	mem.bytesAlloc = registry.Gauge("mem.heapBytesAllocated", nil)
-	mem.allocationRate = spectator.NewMonotonicCounter(registry, "mem.allocationRate", nil)
+	mem.allocationRate = newMonotonicCounter(registry, "mem.allocationRate", nil)
 	mem.totalBytesSystem = registry.Gauge("mem.maxHeapBytes", nil)
 	mem.numLiveObjects = registry.Gauge("mem.numLiveObjects", nil)
-	mem.objectsAllocated = NewMonotonicCounter(registry, "mem.objectsAllocated", nil)
-	mem.objectsFreed = NewMonotonicCounter(registry, "mem.objectsFreed", nil)
+	mem.objectsAllocated = newMonotonicCounter(registry, "mem.objectsAllocated", nil)
+	mem.objectsFreed = newMonotonicCounter(registry, "mem.objectsFreed", nil)
 	mem.gcPauseTime = registry.Timer("gc.pauseTime", nil)
 	mem.gcAge = registry.Gauge("gc.timeSinceLastGC", nil)
-	mem.gcCount = NewMonotonicCounter(registry, "gc.count", nil)
-	mem.forcedGcCount = NewMonotonicCounter(registry, "gc.forcedCount", nil)
+	mem.gcCount = newMonotonicCounter(registry, "gc.count", nil)
+	mem.forcedGcCount = newMonotonicCounter(registry, "gc.forcedCount", nil)
 	mem.gcPercCpu = registry.Gauge("gc.cpuPercentage", nil)
 }
 

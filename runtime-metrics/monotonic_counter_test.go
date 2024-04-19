@@ -8,7 +8,7 @@ import (
 
 func TestNewMonotonicCounter(t *testing.T) {
 	r := spectator.NewRegistry(spectator2.makeConfig("http://example.org"))
-	c := NewMonotonicCounter(r, "mono", nil)
+	c := newMonotonicCounter(r, "mono", nil)
 
 	if v := c.Count(); v != 0 {
 		t.Errorf("Counters should be initialized to 0, got %d", v)
@@ -32,7 +32,7 @@ func TestNewMonotonicCounter(t *testing.T) {
 
 func TestMonotonicCounterStartingAt0(t *testing.T) {
 	r := spectator.NewRegistry(spectator2.makeConfig("http://example.org"))
-	c := NewMonotonicCounter(r, "mono", nil)
+	c := newMonotonicCounter(r, "mono", nil)
 
 	c.Set(0)
 	if c.counter == nil {
@@ -51,7 +51,7 @@ func TestMonotonicCounterStartingAt0(t *testing.T) {
 
 func TestMonotonicCounterThreadSafety(t *testing.T) {
 	r := spectator.NewRegistry(spectator2.makeConfig("http://example.org"))
-	c := NewMonotonicCounter(r, "mono", nil)
+	c := newMonotonicCounter(r, "mono", nil)
 
 	go func() {
 		c.Set(0)
