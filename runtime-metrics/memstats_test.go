@@ -100,6 +100,10 @@ func validateMeasurements(t *testing.T, lines []string, expectedMeasurements map
 	for _, line := range lines {
 		// split line by ":" and get the first and third items
 		_, metricId, value, err := spectator.ParseProtocolLine(line)
+		if err != nil {
+			t.Error(err)
+		}
+
 		actualValue, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			t.Error(err)
