@@ -2,7 +2,7 @@ module github.com/Netflix/spectator-go-runtime-metrics
 
 go 1.12
 
-require github.com/Netflix/spectator-go v0.2.2
+require github.com/Netflix/spectator-go v1.3.2
 
 require (
 	github.com/json-iterator/go v1.1.12 // indirect

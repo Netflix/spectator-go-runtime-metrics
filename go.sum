@@ -1,5 +1,13 @@
 github.com/Netflix/spectator-go v0.2.2 h1:iOgfmdqzfZ/FpK3/w0+gTg1/zOT3WbFh0ElkBFnD0J4=
 github.com/Netflix/spectator-go v0.2.2/go.mod h1:+oeNlFigCwf5vuCSSsVn9l18GSrf8Oslx6F6ZQpi0xI=
+github.com/Netflix/spectator-go v1.2.1 h1:UsfXEPk0MBJpURrp6+6C6DAbp1/+n51VLfedxybLa9k=
+github.com/Netflix/spectator-go v1.2.1/go.mod h1:+oeNlFigCwf5vuCSSsVn9l18GSrf8Oslx6F6ZQpi0xI=
+github.com/Netflix/spectator-go v1.3.0 h1:+gO1ZZDtxVzVNq59UPdOzK8kVousrnDgxsZsE41j504=
+github.com/Netflix/spectator-go v1.3.0/go.mod h1:+oeNlFigCwf5vuCSSsVn9l18GSrf8Oslx6F6ZQpi0xI=
+github.com/Netflix/spectator-go v1.3.1 h1:lFIs8UHBIjy690SMDxhMDwHeuKBmjNeYJCeZC8sjEKI=
+github.com/Netflix/spectator-go v1.3.1/go.mod h1:+oeNlFigCwf5vuCSSsVn9l18GSrf8Oslx6F6ZQpi0xI=
+github.com/Netflix/spectator-go v1.3.2 h1:0dx2ua9lSKammzJYREKYPB4AuuwLg1E4Kf9IetrZLKo=
+github.com/Netflix/spectator-go v1.3.2/go.mod h1:+oeNlFigCwf5vuCSSsVn9l18GSrf8Oslx6F6ZQpi0xI=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
