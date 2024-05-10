@@ -4,8 +4,6 @@
 
 # Spectator-go Runtime Metrics
 
-> :warning: Experimental
-
 Library to collect runtime metrics for Golang applications using spectator-go.
 
 ## Instrumenting Code
