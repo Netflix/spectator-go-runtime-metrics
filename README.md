@@ -4,7 +4,7 @@
 
 # Spectator-go Runtime Metrics
 
-Library to collect runtime metrics for Golang applications using spectator-go.
+Library to collect runtime metrics for Golang applications using [spectator-go](https://github.com/Netflix/spectator-go).
 
 ## Instrumenting Code
 
