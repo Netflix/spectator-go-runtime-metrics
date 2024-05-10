@@ -1,7 +1,8 @@
 package runtime_metrics
 
 import (
-	"github.com/Netflix/spectator-go"
+	"github.com/Netflix/spectator-go/spectator"
+	"github.com/Netflix/spectator-go/spectator/meter"
 	"runtime"
 	"time"
 )
@@ -9,19 +10,19 @@ import (
 type memStatsCollector struct {
 	clock            Clock
 	registry         *spectator.Registry
-	bytesAlloc       *spectator.Gauge
-	allocationRate   *monotonicCounter
-	totalBytesSystem *spectator.Gauge
-	numLiveObjects   *spectator.Gauge
-	objectsAllocated *monotonicCounter
-	objectsFreed     *monotonicCounter
+	bytesAlloc       *meter.Gauge
+	allocationRate   *meter.MonotonicCounter
+	totalBytesSystem *meter.Gauge
+	numLiveObjects   *meter.Gauge
+	objectsAllocated *meter.MonotonicCounter
+	objectsFreed     *meter.MonotonicCounter
 
 	gcLastPauseTimeValue uint64
-	gcPauseTime          *spectator.Timer
-	gcAge                *spectator.Gauge
-	gcCount              *monotonicCounter
-	forcedGcCount        *monotonicCounter
-	gcPercCpu            *spectator.Gauge
+	gcPauseTime          *meter.Timer
+	gcAge                *meter.Gauge
+	gcCount              *meter.MonotonicCounter
+	forcedGcCount        *meter.MonotonicCounter
+	gcPercCpu            *meter.Gauge
 }
 
 func memStats(m *memStatsCollector) {
@@ -56,15 +57,15 @@ func initializeMemStatsCollector(registry *spectator.Registry, clock Clock, mem 
 	mem.clock = clock
 	mem.registry = registry
 	mem.bytesAlloc = registry.Gauge("mem.heapBytesAllocated", nil)
-	mem.allocationRate = newMonotonicCounter(registry, "mem.allocationRate", nil)
+	mem.allocationRate = registry.MonotonicCounter("mem.allocationRate", nil)
 	mem.totalBytesSystem = registry.Gauge("mem.maxHeapBytes", nil)
 	mem.numLiveObjects = registry.Gauge("mem.numLiveObjects", nil)
-	mem.objectsAllocated = newMonotonicCounter(registry, "mem.objectsAllocated", nil)
-	mem.objectsFreed = newMonotonicCounter(registry, "mem.objectsFreed", nil)
+	mem.objectsAllocated = registry.MonotonicCounter("mem.objectsAllocated", nil)
+	mem.objectsFreed = registry.MonotonicCounter("mem.objectsFreed", nil)
 	mem.gcPauseTime = registry.Timer("gc.pauseTime", nil)
 	mem.gcAge = registry.Gauge("gc.timeSinceLastGC", nil)
-	mem.gcCount = newMonotonicCounter(registry, "gc.count", nil)
-	mem.forcedGcCount = newMonotonicCounter(registry, "gc.forcedCount", nil)
+	mem.gcCount = registry.MonotonicCounter("gc.count", nil)
+	mem.forcedGcCount = registry.MonotonicCounter("gc.forcedCount", nil)
 	mem.gcPercCpu = registry.Gauge("gc.cpuPercentage", nil)
 }
 

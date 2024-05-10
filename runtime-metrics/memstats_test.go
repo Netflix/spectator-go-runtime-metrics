@@ -1,18 +1,31 @@
 package runtime_metrics
 
 import (
-	"github.com/Netflix/spectator-go"
-	"reflect"
+	"github.com/Netflix/spectator-go/spectator"
+	"github.com/Netflix/spectator-go/spectator/writer"
 	"runtime"
+	"strconv"
 	"testing"
 	"time"
 )
 
-// TODO this test will need to be rewritten once we migrate to spectator-go thin client because we'll no longer have access to the Meters() method
 func TestUpdateMemStats(t *testing.T) {
 	var clock ManualClock
-	config := makeConfig("")
-	registry := spectator.NewRegistry(config)
+	config := &spectator.Config{
+		Location: "memory",
+		CommonTags: map[string]string{
+			"nf.app":     "test",
+			"nf.cluster": "test-main",
+			"nf.asg":     "test-main-v001",
+			"nf.region":  "us-west-1",
+		},
+	}
+
+	registry, err := spectator.NewRegistry(config)
+	if err != nil {
+		t.Error(err)
+	}
+
 	var mem memStatsCollector
 
 	initializeMemStatsCollector(registry, &clock, &mem)
@@ -31,40 +44,24 @@ func TestUpdateMemStats(t *testing.T) {
 	memStats.PauseTotalNs = uint64(5 * time.Millisecond)
 	updateMemStats(&mem, &memStats)
 
-	ms := myMeters(registry)
-	if len(ms) != 11 {
-		t.Error("Expected 11 meters registered, got", len(ms))
-	}
-
-	expectedValues := map[string]float64{
+	expectedMeasurements := map[string]float64{
 		"mem.numLiveObjects":     5,
 		"mem.heapBytesAllocated": 100,
 		"mem.maxHeapBytes":       300,
-		"gc.timeSinceLastGC":     float64(30),
+		"gc.timeSinceLastGC":     30,
 		"gc.cpuPercentage":       50,
+		"gc.pauseTime":           0.005,
 	}
-	for _, m := range ms {
-		name := m.MeterId().Name()
-		if name == "gc.pauseTime" {
-			assertTimer(t, m.(*spectator.Timer), 1, 5*1e6, 25*1e12, 5*1e6)
-		} else {
-			expected := expectedValues[name]
-			measures := m.Measure()
-			if expected > 0 {
-				if len(measures) != 1 {
-					t.Fatalf("Expected one value from %v: got %d", m.MeterId(), len(measures))
-				}
-				if v := measures[0].Value(); v != expected {
-					t.Errorf("%v: expected %f. got %f", m.MeterId(), expected, v)
-				}
-			} else {
-				if len(measures) != 0 {
-					t.Errorf("Unexpected measurements from %v: got %d measurements", m.MeterId(), len(measures))
-				}
-			}
-		}
-	}
+	memoryWriter := registry.GetWriter().(*writer.MemoryWriter)
 
+	// Validate measurements
+	measurements := memoryWriter.Lines
+	validateMeasurements(t, measurements, expectedMeasurements)
+
+	// reset memory writer
+	memoryWriter.Lines = []string{}
+
+	// Update metrics
 	clock.SetFromDuration(2 * time.Minute)
 
 	memStats.Alloc = 200
@@ -79,67 +76,45 @@ func TestUpdateMemStats(t *testing.T) {
 	memStats.PauseTotalNs = uint64(15 * time.Millisecond)
 
 	updateMemStats(&mem, &memStats)
-	ms = registry.Meters()
-	expectedValues = map[string]float64{
+
+	expectedMeasurements = map[string]float64{
 		"mem.numLiveObjects":     10,
 		"mem.heapBytesAllocated": 200,
 		"mem.maxHeapBytes":       600,
-		"mem.objectsAllocated":   10,
-		"mem.objectsFreed":       5,
-		"mem.allocationRate":     200,
-		"gc.timeSinceLastGC":     float64(90),
+		"mem.objectsAllocated":   20,
+		"mem.objectsFreed":       10,
+		"mem.allocationRate":     400,
+		"gc.timeSinceLastGC":     90,
 		"gc.cpuPercentage":       40,
-		"gc.count":               3,
-		"gc.forcedCount":         1,
+		"gc.count":               5,
+		"gc.forcedCount":         2,
+		"gc.pauseTime":           0.01,
 	}
-	for _, m := range ms {
-		name := m.MeterId().Name()
-		switch name {
-		case "gc.pauseTime":
-			assertTimer(t, m.(*spectator.Timer), 1, 10*1e6, 100*1e12, 10*1e6)
-		case "spectator.registrySize":
-		default:
-			expected := expectedValues[name]
-			measures := m.Measure()
-			if expected > 0 {
-				if len(measures) != 1 {
-					t.Errorf("Expected one value from %v: got %d", m.MeterId(), len(measures))
-				}
-				if v := measures[0].Value(); v != expected {
-					t.Errorf("%v: expected %f. got %f", m.MeterId(), expected, v)
-				}
-			} else if len(measures) != 0 {
-				t.Errorf("Unexpected measurements from %v: got %d measurements", m.MeterId(), len(measures))
-			}
-		}
-	}
+
+	// Validate measurements
+	measurements = memoryWriter.Lines
+	validateMeasurements(t, measurements, expectedMeasurements)
 }
 
-func assertTimer(t *testing.T, timer *spectator.Timer, count int64, total int64, totalSq float64, max int64) {
-	ms := timer.Measure()
-	if len(ms) != 4 {
-		t.Error("Expected 4 measurements from a Timer, got ", len(ms))
-	}
-
-	expected := make(map[string]float64)
-	expected[timer.MeterId().WithStat("count").MapKey()] = float64(count)
-	expected[timer.MeterId().WithStat("totalTime").MapKey()] = float64(total) / 1e9
-	expected[timer.MeterId().WithStat("totalOfSquares").MapKey()] = totalSq / 1e18
-	expected[timer.MeterId().WithStat("max").MapKey()] = float64(max) / 1e9
-
-	got := make(map[string]float64)
-	for _, v := range ms {
-		got[v.Id().MapKey()] = v.Value()
-	}
-	if !reflect.DeepEqual(got, expected) {
-		t.Errorf("Expected measurements (count=%d, total=%d, totalSq=%.0f, max=%d)", count, total, totalSq, max)
-		for _, m := range ms {
-			t.Errorf("Got %s %v = %f", m.Id().Name(), m.Id().Tags(), m.Value())
+func validateMeasurements(t *testing.T, lines []string, expectedMeasurements map[string]float64) {
+	for _, line := range lines {
+		// split line by ":" and get the first and third items
+		_, metricId, value, err := spectator.ParseProtocolLine(line)
+		if err != nil {
+			t.Error(err)
 		}
-	}
 
-	// ensure timer is reset after being measured
-	if timer.Count() != 0 || timer.TotalTime() != 0 {
-		t.Error("Timer should be reset after being measured")
+		actualValue, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			t.Error(err)
+		}
+
+		for metricName, expectedValue := range expectedMeasurements {
+			if metricId.Name() == metricName {
+				if expectedValue != actualValue {
+					t.Errorf("Expected %f for %s but got %f", expectedValue, metricName, actualValue)
+				}
+			}
+		}
 	}
 }
