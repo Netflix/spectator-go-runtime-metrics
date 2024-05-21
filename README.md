@@ -13,11 +13,11 @@ package main
 
 import (
 	"github.com/Netflix/spectator-go-runtime-metrics/runtime-metrics"
-	"github.com/Netflix/spectator-go/spectator"
+	"github.com/Netflix/spectator-go/v2/spectator"
 )
 
 func main() {
-	config := &spectator.Config{}
+	config, _ := spectator.NewConfig("", nil, nil)
 	registry, _ := spectator.NewRegistry(config)
 	defer registry.Close()
 
