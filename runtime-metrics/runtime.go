@@ -1,14 +1,15 @@
 package runtime_metrics
 
 import (
-	"github.com/Netflix/spectator-go/spectator"
-	"github.com/Netflix/spectator-go/spectator/meter"
 	"runtime"
 	"time"
+
+	"github.com/Netflix/spectator-go/v2/spectator"
+	"github.com/Netflix/spectator-go/v2/spectator/meter"
 )
 
 type sysStatsCollector struct {
-	registry      *spectator.Registry
+	registry      spectator.Registry
 	curOpen       *meter.Gauge
 	maxOpen       *meter.Gauge
 	numGoroutines *meter.Gauge
@@ -20,7 +21,7 @@ func goRuntimeStats(s *sysStatsCollector) {
 
 // CollectSysStats collects system stats: current/max file handles, number of
 // goroutines
-func CollectSysStats(registry *spectator.Registry) {
+func CollectSysStats(registry spectator.Registry) {
 	var s sysStatsCollector
 	s.registry = registry
 	s.maxOpen = registry.Gauge("fh.max", nil)
@@ -41,7 +42,7 @@ func CollectSysStats(registry *spectator.Registry) {
 // CollectRuntimeMetrics starts the collection of memory and file handle metrics
 //
 //goland:noinspection GoUnusedExportedFunction
-func CollectRuntimeMetrics(registry *spectator.Registry) {
+func CollectRuntimeMetrics(registry spectator.Registry) {
 	CollectMemStats(registry)
 	CollectSysStats(registry)
 }

@@ -1,24 +1,29 @@
 package runtime_metrics
 
 import (
-	"github.com/Netflix/spectator-go/spectator"
-	"github.com/Netflix/spectator-go/spectator/writer"
 	"runtime"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/Netflix/spectator-go/v2/spectator"
+	"github.com/Netflix/spectator-go/v2/spectator/writer"
 )
 
 func TestUpdateMemStats(t *testing.T) {
 	var clock ManualClock
-	config := &spectator.Config{
-		Location: "memory",
-		CommonTags: map[string]string{
+	config, err := spectator.NewConfig(
+		"memory",
+		map[string]string{
 			"nf.app":     "test",
 			"nf.cluster": "test-main",
 			"nf.asg":     "test-main-v001",
 			"nf.region":  "us-west-1",
 		},
+		nil,
+	)
+	if err != nil {
+		t.Error(err)
 	}
 
 	registry, err := spectator.NewRegistry(config)

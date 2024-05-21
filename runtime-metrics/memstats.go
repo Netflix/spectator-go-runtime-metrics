@@ -1,15 +1,16 @@
 package runtime_metrics
 
 import (
-	"github.com/Netflix/spectator-go/spectator"
-	"github.com/Netflix/spectator-go/spectator/meter"
 	"runtime"
 	"time"
+
+	"github.com/Netflix/spectator-go/v2/spectator"
+	"github.com/Netflix/spectator-go/v2/spectator/meter"
 )
 
 type memStatsCollector struct {
 	clock            Clock
-	registry         *spectator.Registry
+	registry         spectator.Registry
 	bytesAlloc       *meter.Gauge
 	allocationRate   *meter.MonotonicCounter
 	totalBytesSystem *meter.Gauge
@@ -33,11 +34,11 @@ func memStats(m *memStatsCollector) {
 
 func updateMemStats(m *memStatsCollector, mem *runtime.MemStats) {
 	m.bytesAlloc.Set(float64(mem.Alloc))
-	m.allocationRate.Set(int64(mem.TotalAlloc))
+	m.allocationRate.Set(mem.TotalAlloc)
 	m.totalBytesSystem.Set(float64(mem.Sys))
 	m.numLiveObjects.Set(float64(mem.Mallocs - mem.Frees))
-	m.objectsAllocated.Set(int64(mem.Mallocs))
-	m.objectsFreed.Set(int64(mem.Frees))
+	m.objectsAllocated.Set(mem.Mallocs)
+	m.objectsFreed.Set(mem.Frees)
 
 	nanosPause := mem.PauseTotalNs - m.gcLastPauseTimeValue
 	m.gcPauseTime.Record(time.Duration(nanosPause))
@@ -48,12 +49,12 @@ func updateMemStats(m *memStatsCollector, mem *runtime.MemStats) {
 	secondsSinceLastGC := float64(timeSinceLastGC) / 1e9
 	m.gcAge.Set(secondsSinceLastGC)
 
-	m.gcCount.Set(int64(mem.NumGC))
-	m.forcedGcCount.Set(int64(mem.NumForcedGC))
+	m.gcCount.Set(uint64(mem.NumGC))
+	m.forcedGcCount.Set(uint64(mem.NumForcedGC))
 	m.gcPercCpu.Set(mem.GCCPUFraction * 100)
 }
 
-func initializeMemStatsCollector(registry *spectator.Registry, clock Clock, mem *memStatsCollector) {
+func initializeMemStatsCollector(registry spectator.Registry, clock Clock, mem *memStatsCollector) {
 	mem.clock = clock
 	mem.registry = registry
 	mem.bytesAlloc = registry.Gauge("mem.heapBytesAllocated", nil)
@@ -69,7 +70,7 @@ func initializeMemStatsCollector(registry *spectator.Registry, clock Clock, mem 
 	mem.gcPercCpu = registry.Gauge("gc.cpuPercentage", nil)
 }
 
-func CollectMemStatsWithClock(registry *spectator.Registry, clock Clock) {
+func CollectMemStatsWithClock(registry spectator.Registry, clock Clock) {
 	var mem memStatsCollector
 	initializeMemStatsCollector(registry, clock, &mem)
 
@@ -86,6 +87,6 @@ func CollectMemStatsWithClock(registry *spectator.Registry, clock Clock) {
 // CollectMemStats collects memory stats
 //
 // See: https://golang.org/pkg/runtime/#MemStats
-func CollectMemStats(registry *spectator.Registry) {
+func CollectMemStats(registry spectator.Registry) {
 	CollectMemStatsWithClock(registry, &SystemClock{})
 }
