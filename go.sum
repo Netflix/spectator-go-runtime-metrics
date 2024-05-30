@@ -1,2 +1,4 @@
 github.com/Netflix/spectator-go/v2 v2.0.0-beta.1.0.20240521190043-09e58cc6d88d h1:Y5vcoRNnw/f726DsnnpYdNowglBYITv0gfvT8GamDoc=
 github.com/Netflix/spectator-go/v2 v2.0.0-beta.1.0.20240521190043-09e58cc6d88d/go.mod h1:aWA4AXO8aiq+x3cTafN4lGYv9ayx864IZoYyGo78K8Y=
+github.com/Netflix/spectator-go/v2 v2.0.0 h1:hkJGTAGStw5za0NmUQ8E4Eq17DlyryvejvxnwtUPW04=
+github.com/Netflix/spectator-go/v2 v2.0.0/go.mod h1:aWA4AXO8aiq+x3cTafN4lGYv9ayx864IZoYyGo78K8Y=
