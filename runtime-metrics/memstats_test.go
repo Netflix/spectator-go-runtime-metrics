@@ -60,11 +60,11 @@ func TestUpdateMemStats(t *testing.T) {
 	memoryWriter := registry.GetWriter().(*writer.MemoryWriter)
 
 	// Validate measurements
-	measurements := memoryWriter.Lines
+	measurements := memoryWriter.Lines()
 	validateMeasurements(t, measurements, expectedMeasurements)
 
 	// reset memory writer
-	memoryWriter.Lines = []string{}
+	memoryWriter.Reset()
 
 	// Update metrics
 	clock.SetFromDuration(2 * time.Minute)
@@ -97,7 +97,7 @@ func TestUpdateMemStats(t *testing.T) {
 	}
 
 	// Validate measurements
-	measurements = memoryWriter.Lines
+	measurements = memoryWriter.Lines()
 	validateMeasurements(t, measurements, expectedMeasurements)
 }
 
