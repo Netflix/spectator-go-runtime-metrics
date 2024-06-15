@@ -6,8 +6,6 @@
 
 Library to collect runtime metrics for Golang applications using [spectator-go](https://github.com/Netflix/spectator-go).
 
-Requires `spectatord >= 0.11.1`, due to the use of `MonotonicCounterUint`.
-
 ## Instrumenting Code
 
 ```go

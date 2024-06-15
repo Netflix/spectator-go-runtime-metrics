@@ -8,15 +8,18 @@ import (
 	"github.com/Netflix/spectator-go/v2/spectator/meter"
 )
 
+// Convert allocationRate, objectsAllocated, and objectsFreed to MonotonicCounterUint when spectatord >= 0.11.1
+// is more broadly adopted in the environment. This change is held for now, so that we do not block adoption of
+// this library into nflx-otel-collector.
 type memStatsCollector struct {
 	clock            Clock
 	registry         spectator.Registry
 	bytesAlloc       *meter.Gauge
-	allocationRate   *meter.MonotonicCounterUint
+	allocationRate   *meter.MonotonicCounter
 	totalBytesSystem *meter.Gauge
 	numLiveObjects   *meter.Gauge
-	objectsAllocated *meter.MonotonicCounterUint
-	objectsFreed     *meter.MonotonicCounterUint
+	objectsAllocated *meter.MonotonicCounter
+	objectsFreed     *meter.MonotonicCounter
 
 	gcLastPauseTimeValue uint64
 	gcPauseTime          *meter.Timer
@@ -34,11 +37,11 @@ func memStats(m *memStatsCollector) {
 
 func updateMemStats(m *memStatsCollector, mem *runtime.MemStats) {
 	m.bytesAlloc.Set(float64(mem.Alloc))
-	m.allocationRate.Set(mem.TotalAlloc)
+	m.allocationRate.Set(float64(mem.TotalAlloc))
 	m.totalBytesSystem.Set(float64(mem.Sys))
 	m.numLiveObjects.Set(float64(mem.Mallocs - mem.Frees))
-	m.objectsAllocated.Set(mem.Mallocs)
-	m.objectsFreed.Set(mem.Frees)
+	m.objectsAllocated.Set(float64(mem.Mallocs))
+	m.objectsFreed.Set(float64(mem.Frees))
 
 	nanosPause := mem.PauseTotalNs - m.gcLastPauseTimeValue
 	m.gcPauseTime.Record(time.Duration(nanosPause))
@@ -58,11 +61,11 @@ func initializeMemStatsCollector(registry spectator.Registry, clock Clock, mem *
 	mem.clock = clock
 	mem.registry = registry
 	mem.bytesAlloc = registry.Gauge("mem.heapBytesAllocated", nil)
-	mem.allocationRate = registry.MonotonicCounterUint("mem.allocationRate", nil)
+	mem.allocationRate = registry.MonotonicCounter("mem.allocationRate", nil)
 	mem.totalBytesSystem = registry.Gauge("mem.maxHeapBytes", nil)
 	mem.numLiveObjects = registry.Gauge("mem.numLiveObjects", nil)
-	mem.objectsAllocated = registry.MonotonicCounterUint("mem.objectsAllocated", nil)
-	mem.objectsFreed = registry.MonotonicCounterUint("mem.objectsFreed", nil)
+	mem.objectsAllocated = registry.MonotonicCounter("mem.objectsAllocated", nil)
+	mem.objectsFreed = registry.MonotonicCounter("mem.objectsFreed", nil)
 	mem.gcPauseTime = registry.Timer("gc.pauseTime", nil)
 	mem.gcAge = registry.Gauge("gc.timeSinceLastGC", nil)
 	mem.gcCount = registry.MonotonicCounter("gc.count", nil)
