@@ -12,11 +12,11 @@ type memStatsCollector struct {
 	clock            Clock
 	registry         spectator.Registry
 	bytesAlloc       *meter.Gauge
-	allocationRate   *meter.MonotonicCounter
+	allocationRate   *meter.MonotonicCounterUint
 	totalBytesSystem *meter.Gauge
 	numLiveObjects   *meter.Gauge
-	objectsAllocated *meter.MonotonicCounter
-	objectsFreed     *meter.MonotonicCounter
+	objectsAllocated *meter.MonotonicCounterUint
+	objectsFreed     *meter.MonotonicCounterUint
 
 	gcLastPauseTimeValue uint64
 	gcPauseTime          *meter.Timer
@@ -49,8 +49,8 @@ func updateMemStats(m *memStatsCollector, mem *runtime.MemStats) {
 	secondsSinceLastGC := float64(timeSinceLastGC) / 1e9
 	m.gcAge.Set(secondsSinceLastGC)
 
-	m.gcCount.Set(uint64(mem.NumGC))
-	m.forcedGcCount.Set(uint64(mem.NumForcedGC))
+	m.gcCount.Set(float64(mem.NumGC))
+	m.forcedGcCount.Set(float64(mem.NumForcedGC))
 	m.gcPercCpu.Set(mem.GCCPUFraction * 100)
 }
 
@@ -58,11 +58,11 @@ func initializeMemStatsCollector(registry spectator.Registry, clock Clock, mem *
 	mem.clock = clock
 	mem.registry = registry
 	mem.bytesAlloc = registry.Gauge("mem.heapBytesAllocated", nil)
-	mem.allocationRate = registry.MonotonicCounter("mem.allocationRate", nil)
+	mem.allocationRate = registry.MonotonicCounterUint("mem.allocationRate", nil)
 	mem.totalBytesSystem = registry.Gauge("mem.maxHeapBytes", nil)
 	mem.numLiveObjects = registry.Gauge("mem.numLiveObjects", nil)
-	mem.objectsAllocated = registry.MonotonicCounter("mem.objectsAllocated", nil)
-	mem.objectsFreed = registry.MonotonicCounter("mem.objectsFreed", nil)
+	mem.objectsAllocated = registry.MonotonicCounterUint("mem.objectsAllocated", nil)
+	mem.objectsFreed = registry.MonotonicCounterUint("mem.objectsFreed", nil)
 	mem.gcPauseTime = registry.Timer("gc.pauseTime", nil)
 	mem.gcAge = registry.Gauge("gc.timeSinceLastGC", nil)
 	mem.gcCount = registry.MonotonicCounter("gc.count", nil)
