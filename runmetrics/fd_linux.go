@@ -1,4 +1,4 @@
-package runtime_metrics
+package runmetrics
 
 import (
 	"os"

@@ -12,7 +12,7 @@ Library to collect runtime metrics for Golang applications using [spectator-go](
 package main
 
 import (
-	"github.com/Netflix/spectator-go-runtime-metrics/runtime-metrics"
+	"github.com/Netflix/spectator-go-runtime-metrics/runmetrics"
 	"github.com/Netflix/spectator-go/v2/spectator"
 )
 
@@ -21,6 +21,6 @@ func main() {
 	registry, _ := spectator.NewRegistry(config)
 	defer registry.Close()
 
-	runtime_metrics.CollectRuntimeMetrics(registry)
+	runmetrics.CollectRuntimeMetrics(registry)
 }
 ```
